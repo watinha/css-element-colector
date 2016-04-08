@@ -1,14 +1,22 @@
 package edu.utfpr;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
 public class App {
@@ -16,10 +24,12 @@ public class App {
     public static void main(String[] args) throws IOException {
         WebDriver driver = new FirefoxDriver();
         JavascriptExecutor executor = (JavascriptExecutor) driver;
-        FileWriter writer = new FileWriter(new File("r.csv"));
+        FileWriter writer = new FileWriter(new File("data/r.csv"));
+        String url = "file:///home/willian/Dropbox/artigos/xbi-css/201302/1.html";
         List <WebElement> all_elements;
 
-        driver.get("file:///home/willian/Dropbox/artigos/xbi-css/201302/1.html");
+        driver.get(url);
+        driver.manage().window().maximize();
         all_elements = driver.findElements(By.cssSelector("*"));
         executor.executeScript("window.elements = document.querySelectorAll('*');");
         writer.write(executor.executeScript(
@@ -44,7 +54,31 @@ public class App {
                 "return window.result.join('|')"
             ).toString());
         }
-
         writer.close();
+
+        List <WebDriver> lista_drivers = new ArrayList <> ();
+        lista_drivers.add(new FirefoxDriver());
+        lista_drivers.add(new ChromeDriver());
+
+        for (int driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
+            lista_drivers.get(driver_index).get(url);
+            lista_drivers.get(driver_index).manage().window().maximize();
+            all_elements = lista_drivers.get(driver_index).findElements(By.cssSelector("*"));
+            File screenshot = ((TakesScreenshot) lista_drivers.get(driver_index)).getScreenshotAs(OutputType.FILE);
+            for (int i = 0; i < all_elements.size(); i++) {
+                WebElement target = all_elements.get(i);
+                BufferedImage fullimg = ImageIO.read(screenshot);
+                Point point = target.getLocation();
+                int width = (target.getSize().getWidth() != 0 ?
+                                target.getSize().getWidth() : 1),
+                    height = (target.getSize().getHeight() != 0 ?
+                                target.getSize().getHeight() : 1);
+                BufferedImage targetScreenshot = fullimg.getSubimage(
+                        point.getX(), point.getY(), width, height);
+                File targetLocation = new File("data/" + i + "." + driver_index + ".png");
+                ImageIO.write(targetScreenshot, "png", targetLocation);
+            }
+            lista_drivers.get(driver_index).quit();
+        }
     }
 }
