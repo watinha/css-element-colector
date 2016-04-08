@@ -1,5 +1,6 @@
 package edu.utfpr;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
@@ -74,7 +75,16 @@ public class App {
                     height = (target.getSize().getHeight() != 0 ?
                                 target.getSize().getHeight() : 1);
                 BufferedImage targetScreenshot = fullimg.getSubimage(
-                        point.getX(), point.getY(), width, height);
+                        0, 0, fullimg.getWidth(), fullimg.getHeight());
+
+                for (int image_x = 0; image_x < width; image_x++) {
+                    for (int image_y = 0; image_y < height; image_y++) {
+                        targetScreenshot.setRGB(
+                                point.getX() + image_x, point.getY() + image_y,
+                                    (new Color(255, 255, 255, 255)).hashCode());
+                    }
+                }
+
                 File targetLocation = new File("data/" + i + "." + driver_index + ".png");
                 ImageIO.write(targetScreenshot, "png", targetLocation);
             }
