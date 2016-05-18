@@ -25,7 +25,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 public class App {
 
     public static void crawl_and_capture_screens (String url, String css_attributes, FileWriter writer,
-                                                  WebDriver driver, JavascriptExecutor executor) throws IOException {
+            WebDriver driver, JavascriptExecutor executor) throws IOException, InterruptedException {
         List <WebElement> all_elements;
         all_elements = driver.findElements(By.cssSelector("*"));
         executor.executeScript("window.elements = document.querySelectorAll('*');" +
@@ -63,6 +63,7 @@ public class App {
                                    "reset_element.rel = 'stylesheet';" +
                                    "reset_element.href = '../normalize.css';" +
                                    "document.body.appendChild(reset_element);");
+            Thread.sleep(10000);
             File screenshot = ((TakesScreenshot) lista_drivers.get(driver_index)).getScreenshotAs(OutputType.FILE);
             for (int i = 0; i < all_elements.size(); i++) {
                 WebElement target = all_elements.get(i);
@@ -98,12 +99,12 @@ public class App {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         WebDriver driver = new FirefoxDriver();
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         FileWriter writer = new FileWriter(new File("data/elements.csv"));
         BufferedReader br = new BufferedReader(new FileReader("css-attributes-selection.txt"));
-        String url = "file:///home/willian/Dropbox/artigos/xbi-css/201304/4.html";
+        String url = "file:///home/willian/Dropbox/artigos/xbi-css/_201302/_1.html";
         String css_attributes = "[",
                attr = br.readLine();
 
@@ -127,5 +128,6 @@ public class App {
         ).toString());
 
         App.crawl_and_capture_screens(url, css_attributes, writer, driver, executor);
+        driver.quit();
     }
 }
