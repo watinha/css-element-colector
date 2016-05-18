@@ -202,11 +202,6 @@ perspective
 transform-style
 backface-visibility
 top
-transition
-transition-delay
-transition-duration
-transition-property
-transition-timing-function
 unicode-bidi
 vertical-align
 visibility
