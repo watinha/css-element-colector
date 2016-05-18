@@ -24,37 +24,11 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 public class App {
 
-    public static void main(String[] args) throws IOException {
-        WebDriver driver = new FirefoxDriver();
-        JavascriptExecutor executor = (JavascriptExecutor) driver;
-        FileWriter writer = new FileWriter(new File("data/elements.csv"));
-        BufferedReader br = new BufferedReader(new FileReader("css-attributes-selection.txt"));
-        String url = "file:///home/willian/Dropbox/artigos/xbi-css/201302/1.html";
-        String css_attributes = "[",
-               attr = br.readLine();
-
-        while (attr != null) {
-            css_attributes += "\"" + attr + "\"";
-            attr = br.readLine();
-            if (attr == null) {
-                css_attributes += "]";
-                break;
-            }
-            css_attributes += ",";
-        }
-        br.close();
-
-
+    public static void crawl_and_capture_screens (String url, String css_attributes, FileWriter writer,
+                                                  WebDriver driver, JavascriptExecutor executor) throws IOException {
         List <WebElement> all_elements;
-        driver.get(url);
-        driver.manage().window().maximize();
         all_elements = driver.findElements(By.cssSelector("*"));
         executor.executeScript("window.elements = document.querySelectorAll('*');");
-        writer.write(executor.executeScript(
-            // "window.styles_t = window.getComputedStyle(window.elements[0], null);" +
-            "window.css_attributes = " + css_attributes + ";" +
-            "return window.css_attributes.join('\t')"
-        ).toString());
 
         for (int i = 0; i < all_elements.size(); i++) {
             writer.write("\n");
@@ -111,5 +85,36 @@ public class App {
             }
             lista_drivers.get(driver_index).quit();
         }
+    }
+
+    public static void main(String[] args) throws IOException {
+        WebDriver driver = new FirefoxDriver();
+        JavascriptExecutor executor = (JavascriptExecutor) driver;
+        FileWriter writer = new FileWriter(new File("data/elements.csv"));
+        BufferedReader br = new BufferedReader(new FileReader("css-attributes-selection.txt"));
+        String url = "file:///home/willian/Dropbox/artigos/xbi-css/201302/4.html";
+        String css_attributes = "[",
+               attr = br.readLine();
+
+        while (attr != null) {
+            css_attributes += "\"" + attr + "\"";
+            attr = br.readLine();
+            if (attr == null) {
+                css_attributes += "]";
+                break;
+            }
+            css_attributes += ",";
+        }
+        br.close();
+
+        driver.get(url);
+        driver.manage().window().maximize();
+        writer.write("id\t" + executor.executeScript(
+            // "window.styles_t = window.getComputedStyle(window.elements[0], null);" +
+            "window.css_attributes = " + css_attributes + ";" +
+            "return window.css_attributes.join('\t')"
+        ).toString());
+
+        App.crawl_and_capture_screens(url, css_attributes, writer, driver, executor);
     }
 }
