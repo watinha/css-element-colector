@@ -102,9 +102,15 @@ public class App {
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         FileWriter writer = new FileWriter(new File("data/elements.csv"));
         BufferedReader br = new BufferedReader(new FileReader("css-attributes-selection.txt"));
+        BufferedReader br_url = new BufferedReader(new FileReader("url_list.txt"));
         List <String> url_list = new ArrayList <> ();
-        url_list.add("file:///home/willian/Dropbox/artigos/xbi-css/_201302/_1.html");
-        url_list.add("file:///home/willian/Dropbox/artigos/xbi-css/201303/1.html");
+        String u = br_url.readLine();
+        while (u != null) {
+            url_list.add(u);
+            u = br_url.readLine();
+        }
+        br_url.close();
+
         String css_attributes = "[",
                attr = br.readLine();
 
@@ -128,7 +134,7 @@ public class App {
 
         for (String url : url_list) {
             String filename = url.substring(url.lastIndexOf("/") + 1),
-                   folder = url.substring(url.lastIndexOf("/", url.lastIndexOf("/") - 1) + 1, url.lastIndexOf("/") - 1);
+                   folder = url.substring(url.lastIndexOf("/", url.lastIndexOf("/") - 1) + 1, url.lastIndexOf("/"));
             App.crawl_and_capture_screens(url, css_attributes, writer, driver, executor, folder, filename, lista_drivers);
         }
         writer.close();
