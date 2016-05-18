@@ -28,7 +28,12 @@ public class App {
                                                   WebDriver driver, JavascriptExecutor executor) throws IOException {
         List <WebElement> all_elements;
         all_elements = driver.findElements(By.cssSelector("*"));
-        executor.executeScript("window.elements = document.querySelectorAll('*');");
+        executor.executeScript("window.elements = document.querySelectorAll('*');" +
+                               "var reset_element = document.createElement('link');" +
+                               "reset_element.type = 'text/css';" +
+                               "reset_element.rel = 'stylesheet';" +
+                               "reset_element.href = '../normalize.css';" +
+                               "document.body.appendChild(reset_element);");
 
         for (int i = 0; i < all_elements.size(); i++) {
             writer.write("\n");
@@ -52,6 +57,12 @@ public class App {
             lista_drivers.get(driver_index).get(url);
             lista_drivers.get(driver_index).manage().window().maximize();
             all_elements = lista_drivers.get(driver_index).findElements(By.cssSelector("*"));
+            JavascriptExecutor executor2 = (JavascriptExecutor) lista_drivers.get(driver_index);
+            executor2.executeScript("var reset_element = document.createElement('link');" +
+                                   "reset_element.type = 'text/css';" +
+                                   "reset_element.rel = 'stylesheet';" +
+                                   "reset_element.href = '../normalize.css';" +
+                                   "document.body.appendChild(reset_element);");
             File screenshot = ((TakesScreenshot) lista_drivers.get(driver_index)).getScreenshotAs(OutputType.FILE);
             for (int i = 0; i < all_elements.size(); i++) {
                 WebElement target = all_elements.get(i);
@@ -92,7 +103,7 @@ public class App {
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         FileWriter writer = new FileWriter(new File("data/elements.csv"));
         BufferedReader br = new BufferedReader(new FileReader("css-attributes-selection.txt"));
-        String url = "file:///home/willian/Dropbox/artigos/xbi-css/201302/4.html";
+        String url = "file:///home/willian/Dropbox/artigos/xbi-css/201304/4.html";
         String css_attributes = "[",
                attr = br.readLine();
 
