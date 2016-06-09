@@ -182,7 +182,14 @@ public class App {
             "return window.css_attributes.join('\t')"
         ).toString());
         writer.write("\theight\twidth\ttop\tleft\trelative top\trelative left");
-        writer.write("\theight diff\twidth diff\ttop diff\tleft diff\trelative top diff\trelative left diff");
+        for (int j = 1; j < lista_drivers.size(); j++) {
+            writer.write("\theight diff " + j +
+                         "\twidth diff " + j +
+                         "\ttop diff " + j +
+                         "\tleft diff " + j +
+                         "\trelative top diff " + j +
+                         "\trelative left diff " + j);
+        }
 
         for (String url : url_list) {
             String filename = url.substring(url.lastIndexOf("/") + 1),
