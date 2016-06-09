@@ -24,45 +24,95 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 public class App {
 
-    public static void crawl_and_capture_screens (String url, String css_attributes, FileWriter writer,
-            WebDriver driver, JavascriptExecutor executor, String folder, String filename, List <WebDriver> lista_drivers) throws IOException, InterruptedException {
-        List <WebElement> all_elements;
-        all_elements = driver.findElements(By.cssSelector("*"));
-        executor.executeScript("window.css_attributes = " + css_attributes + ";" +
-                               "window.elements = document.querySelectorAll('*');" +
-                               "var reset_element = document.createElement('link');" +
-                               "reset_element.type = 'text/css';" +
-                               "reset_element.rel = 'stylesheet';" +
-                               "reset_element.href = '../normalize.css';" +
-                               "document.body.appendChild(reset_element);");
+    public static void crawl_and_capture_screens (String url, String css_attributes,
+                                                  FileWriter writer, String folder, String filename,
+                                                  List <WebDriver> lista_drivers) throws IOException, InterruptedException {
+        List <List<WebElement>> all_elements_browsers = new ArrayList <List<WebElement>> ();
+        int driver_index, size_elements;
+        JavascriptExecutor executor2;
 
-        for (int i = 0; i < all_elements.size(); i++) {
-            writer.write("\n");
-            writer.write(folder + "." + filename + "." + i + "\t" + executor.executeScript(
-                "window.styles_t = window.getComputedStyle(window.elements[" + i + "], null);" +
-                "window.result = [];" +
-                "for (var i in window.css_attributes) {" +
-                    "if (Number.isNaN(parseInt(window.css_attributes[i])) && typeof window.styles_t[window.css_attributes[i]] !== 'function')" +
-                        "window.result.push(window.styles_t[window.css_attributes[i]]);" +
-                "}" +
-                "return window.result.join('\t')"
-            ).toString());
-        }
-
-        for (int driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
+        for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
             lista_drivers.get(driver_index).get(url);
             lista_drivers.get(driver_index).manage().window().maximize();
-            all_elements = lista_drivers.get(driver_index).findElements(By.cssSelector("*"));
-            JavascriptExecutor executor2 = (JavascriptExecutor) lista_drivers.get(driver_index);
-            executor2.executeScript("var reset_element = document.createElement('link');" +
-                                   "reset_element.type = 'text/css';" +
-                                   "reset_element.rel = 'stylesheet';" +
-                                   "reset_element.href = '../normalize.css';" +
-                                   "document.body.appendChild(reset_element);");
-            Thread.sleep(10000);
-            File screenshot = ((TakesScreenshot) lista_drivers.get(driver_index)).getScreenshotAs(OutputType.FILE);
-            for (int i = 0; i < all_elements.size(); i++) {
-                WebElement target = all_elements.get(i);
+            all_elements_browsers.add(lista_drivers.get(driver_index).findElements(By.cssSelector("*")));
+            executor2 = (JavascriptExecutor) lista_drivers.get(driver_index);
+            executor2.executeScript("window.css_attributes = " + css_attributes + ";" +
+                                    "window.elements = document.querySelectorAll('*');" +
+                                    "var reset_element = document.createElement('link');" +
+                                    "reset_element.type = 'text/css';" +
+                                    "reset_element.rel = 'stylesheet';" +
+                                    "reset_element.href = '../normalize.css';" +
+                                    "document.body.appendChild(reset_element);");
+        }
+        Thread.sleep(10000);
+
+        for (int i = 0; i < all_elements_browsers.get(0).size(); i++) {
+            int offsetHeight = 0,
+                offsetWidth = 0,
+                offsetTop = 0,
+                offsetLeft = 0,
+                relativeOffsetTop = 0,
+                relativeOffsetLeft = 0;
+            for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
+                executor2 = (JavascriptExecutor) lista_drivers.get(driver_index);
+                File screenshot = ((TakesScreenshot) lista_drivers.get(driver_index)).getScreenshotAs(OutputType.FILE);
+                if (driver_index == 0) {
+                    writer.write("\n");
+                    writer.write(folder + "." + filename + "." + i + "\t" + executor2.executeScript(
+                        "window.styles_t = window.getComputedStyle(window.elements[" + i + "], null);" +
+                        "window.result = [];" +
+                        "for (var i in window.css_attributes) {" +
+                            "if (Number.isNaN(parseInt(window.css_attributes[i])) && typeof window.styles_t[window.css_attributes[i]] !== 'function')" +
+                                "window.result.push(window.styles_t[window.css_attributes[i]]);" +
+                        "}" +
+                        "return window.result.join('\t')"
+                    ).toString());
+                    offsetHeight = Integer.parseInt(executor2.executeScript(
+                                    "return window.elements[" + i + "].offsetHeight").toString());
+                    offsetWidth  = Integer.parseInt(executor2.executeScript(
+                                    "return window.elements[" + i + "].offsetWidth").toString());
+                    offsetTop    = Integer.parseInt(executor2.executeScript(
+                                    "return window.elements[" + i + "].offsetTop").toString());
+                    offsetLeft   = Integer.parseInt(executor2.executeScript(
+                                    "return window.elements[" + i + "].offsetLeft").toString());
+                    relativeOffsetTop = Integer.parseInt(executor2.executeScript(
+                        "if (window.elements[" + i + "].parentElement)" +
+                        "return window.elements[" + i + "].offsetTop - window.elements[" + i + "].parentElement.offsetTop;" +
+                        "return window.elements[" + i + "].offsetTop;").toString());
+                    relativeOffsetLeft = Integer.parseInt(executor2.executeScript(
+                        "if (window.elements[" + i + "].parentElement)" +
+                        "return window.elements[" + i + "].offsetLeft - window.elements[" + i + "].parentElement.offsetLeft;" +
+                        "return window.elements[" + i + "].offsetLeft;").toString());
+                    writer.write("\t" + offsetHeight);
+                    writer.write("\t" + offsetWidth);
+                    writer.write("\t" + offsetTop);
+                    writer.write("\t" + offsetLeft);
+                    writer.write("\t" + relativeOffsetTop);
+                    writer.write("\t" + relativeOffsetLeft);
+                } else {
+                    writer.write("\t" +
+                            Math.abs(offsetHeight - Integer.parseInt(executor2.executeScript(
+                                    "return window.elements[" + i + "].offsetHeight").toString())));
+                    writer.write("\t" +
+                            Math.abs(offsetWidth - Integer.parseInt(executor2.executeScript(
+                                    "return window.elements[" + i + "].offsetWidth").toString())));
+                    writer.write("\t" +
+                            Math.abs(offsetTop - Integer.parseInt(executor2.executeScript(
+                                    "return window.elements[" + i + "].offsetTop").toString())));
+                    writer.write("\t" +
+                            Math.abs(offsetLeft - Integer.parseInt(executor2.executeScript(
+                                    "return window.elements[" + i + "].offsetLeft").toString())));
+                    writer.write("\t" + Math.abs(relativeOffsetTop - Integer.parseInt(executor2.executeScript(
+                        "if (window.elements[" + i + "].parentElement)" +
+                        "return window.elements[" + i + "].offsetTop - window.elements[" + i + "].parentElement.offsetTop;" +
+                        "return window.elements[" + i + "].offsetTop;").toString())));
+                    writer.write("\t" + Math.abs(relativeOffsetLeft- Integer.parseInt(executor2.executeScript(
+                        "if (window.elements[" + i + "].parentElement)" +
+                        "return window.elements[" + i + "].offsetLeft - window.elements[" + i + "].parentElement.offsetLeft;" +
+                        "return window.elements[" + i + "].offsetLeft;").toString())));
+                }
+
+                WebElement target = all_elements_browsers.get(driver_index).get(i);
                 BufferedImage fullimg = ImageIO.read(screenshot);
                 Point point = target.getLocation();
                 int width = (target.getSize().getWidth() != 0 ?
@@ -131,11 +181,13 @@ public class App {
             "window.css_attributes = " + css_attributes + ";" +
             "return window.css_attributes.join('\t')"
         ).toString());
+        writer.write("\theight\twidth\ttop\tleft\trelative top\trelative left");
+        writer.write("\theight diff\twidth diff\ttop diff\tleft diff\trelative top diff\trelative left diff");
 
         for (String url : url_list) {
             String filename = url.substring(url.lastIndexOf("/") + 1),
                    folder = url.substring(url.lastIndexOf("/", url.lastIndexOf("/") - 1) + 1, url.lastIndexOf("/"));
-            App.crawl_and_capture_screens(url, css_attributes, writer, driver, executor, folder, filename, lista_drivers);
+            App.crawl_and_capture_screens(url, css_attributes, writer, folder, filename, lista_drivers);
         }
         writer.close();
         driver.quit();
