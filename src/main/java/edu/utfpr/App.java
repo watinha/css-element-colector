@@ -52,7 +52,11 @@ public class App {
                 offsetTop = 0,
                 offsetLeft = 0,
                 relativeOffsetTop = 0,
-                relativeOffsetLeft = 0;
+                relativeOffsetLeft = 0,
+                relativeTopPrevSibling = 0,
+                relativeLeftPrevSibling = 0,
+                relativeTopNextSibling = 0,
+                relativeLeftNextSibling = 0;
             for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
                 executor2 = (JavascriptExecutor) lista_drivers.get(driver_index);
                 File screenshot = ((TakesScreenshot) lista_drivers.get(driver_index)).getScreenshotAs(OutputType.FILE);
@@ -83,12 +87,47 @@ public class App {
                         "if (window.elements[" + i + "].parentElement)" +
                         "return window.elements[" + i + "].offsetLeft - window.elements[" + i + "].parentElement.offsetLeft;" +
                         "return window.elements[" + i + "].offsetLeft;").toString());
+
+                    relativeTopPrevSibling = Integer.parseInt(executor2.executeScript(
+                        "var target = window.elements[" + i + "], p;" +
+                        "while (target.parentElement != null && target.previousElementSibling === null)" +
+                        "   target = target.parentElement;" +
+                        "if (target.previousElementSibling)" +
+                        "return window.elements[" + i + "].offsetTop - target.previousElementSibling.offsetTop;" +
+                        "return 0;").toString());
+                    relativeLeftPrevSibling = Integer.parseInt(executor2.executeScript(
+                        "var target = window.elements[" + i + "], p;" +
+                        "while (target.parentElement != null && target.previousElementSibling === null)" +
+                        "   target = target.parentElement;" +
+                        "if (target.previousElementSibling)" +
+                        "return window.elements[" + i + "].offsetLeft - target.previousElementSibling.offsetLeft;" +
+                        "return 0;").toString());
+                    relativeTopNextSibling = Integer.parseInt(executor2.executeScript(
+                        "var target = window.elements[" + i + "], p;" +
+                        "while (target.parentElement != null && target.nextElementSibling === null)" +
+                        "   target = target.parentElement;" +
+                        "if (target.nextElementSibling)" +
+                        "return window.elements[" + i + "].offsetTop - target.nextElementSibling.offsetTop;" +
+                        "return 0;").toString());
+                    relativeLeftNextSibling = Integer.parseInt(executor2.executeScript(
+                        "var target = window.elements[" + i + "], p;" +
+                        "while (target.parentElement != null && target.nextElementSibling === null)" +
+                        "   target = target.parentElement;" +
+                        "if (target.nextElementSibling)" +
+                        "return window.elements[" + i + "].offsetLeft - target.nextElementSibling.offsetLeft;" +
+                        "return 0;").toString());
+
                     writer.write("\t" + offsetHeight);
                     writer.write("\t" + offsetWidth);
                     writer.write("\t" + offsetTop);
                     writer.write("\t" + offsetLeft);
                     writer.write("\t" + relativeOffsetTop);
                     writer.write("\t" + relativeOffsetLeft);
+
+                    writer.write("\t" + relativeTopPrevSibling);
+                    writer.write("\t" + relativeLeftPrevSibling);
+                    writer.write("\t" + relativeTopNextSibling);
+                    writer.write("\t" + relativeLeftNextSibling);
                 } else {
                     writer.write("\t" +
                             Math.abs(offsetHeight - Integer.parseInt(executor2.executeScript(
@@ -105,11 +144,40 @@ public class App {
                     writer.write("\t" + Math.abs(relativeOffsetTop - Integer.parseInt(executor2.executeScript(
                         "if (window.elements[" + i + "].parentElement)" +
                         "return window.elements[" + i + "].offsetTop - window.elements[" + i + "].parentElement.offsetTop;" +
-                        "return window.elements[" + i + "].offsetTop;").toString())));
+                        "return 0;").toString())));
                     writer.write("\t" + Math.abs(relativeOffsetLeft- Integer.parseInt(executor2.executeScript(
                         "if (window.elements[" + i + "].parentElement)" +
                         "return window.elements[" + i + "].offsetLeft - window.elements[" + i + "].parentElement.offsetLeft;" +
-                        "return window.elements[" + i + "].offsetLeft;").toString())));
+                        "return 0;").toString())));
+
+                    writer.write("\t" + Math.abs(relativeTopPrevSibling - Integer.parseInt(executor2.executeScript(
+                        "var target = window.elements[" + i + "], p;" +
+                        "while (target.parentElement != null && target.previousElementSibling === null)" +
+                        "   target = target.parentElement;" +
+                        "if (target.previousElementSibling)" +
+                        "return window.elements[" + i + "].offsetTop - target.previousElementSibling.offsetTop;" +
+                        "return 0;").toString())));
+                    writer.write("\t" + Math.abs(relativeLeftPrevSibling - Integer.parseInt(executor2.executeScript(
+                        "var target = window.elements[" + i + "], p;" +
+                        "while (target.parentElement != null && target.previousElementSibling === null)" +
+                        "   target = target.parentElement;" +
+                        "if (target.previousElementSibling)" +
+                        "return window.elements[" + i + "].offsetLeft - target.previousElementSibling.offsetLeft;" +
+                        "return 0;").toString())));
+                    writer.write("\t" + Math.abs(relativeTopNextSibling - Integer.parseInt(executor2.executeScript(
+                        "var target = window.elements[" + i + "], p;" +
+                        "while (target.parentElement != null && target.nextElementSibling === null)" +
+                        "   target = target.parentElement;" +
+                        "if (target.nextElementSibling)" +
+                        "return window.elements[" + i + "].offsetTop - target.nextElementSibling.offsetTop;" +
+                        "return 0;").toString())));
+                    writer.write("\t" + Math.abs(relativeLeftNextSibling - Integer.parseInt(executor2.executeScript(
+                        "var target = window.elements[" + i + "], p;" +
+                        "while (target.parentElement != null && target.nextElementSibling === null)" +
+                        "   target = target.parentElement;" +
+                        "if (target.nextElementSibling)" +
+                        "return window.elements[" + i + "].offsetLeft - target.nextElementSibling.offsetLeft;" +
+                        "return 0;").toString())));
                 }
 
                 WebElement target = all_elements_browsers.get(driver_index).get(i);
@@ -182,13 +250,18 @@ public class App {
             "return window.css_attributes.join('\t')"
         ).toString());
         writer.write("\theight\twidth\ttop\tleft\trelative top\trelative left");
+        writer.write("\trelative prev top\trelative prev left\trelative next top\trelative next left");
         for (int j = 1; j < lista_drivers.size(); j++) {
             writer.write("\theight diff " + j +
                          "\twidth diff " + j +
                          "\ttop diff " + j +
                          "\tleft diff " + j +
-                         "\trelative top diff " + j +
-                         "\trelative left diff " + j);
+                         "\tparent top diff " + j +
+                         "\tparent left diff " + j +
+                         "\tprevious sibling top diff " + j +
+                         "\tprevious sibling left diff " + j +
+                         "\tnext sibling top diff " + j +
+                         "\tnext sibling left diff " + j);
         }
 
         for (String url : url_list) {
