@@ -21,6 +21,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
 
 public class App {
 
@@ -217,6 +218,7 @@ public class App {
         List <WebDriver> lista_drivers = new ArrayList <> ();
         lista_drivers.add(new FirefoxDriver());
         lista_drivers.add(new ChromeDriver());
+        lista_drivers.add(new InternetExplorerDriver());
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         FileWriter writer = new FileWriter(new File("data/elements.csv"));
         BufferedReader br = new BufferedReader(new FileReader("css-attributes-selection.txt"));
