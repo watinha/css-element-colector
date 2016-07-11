@@ -40,7 +40,7 @@ public class App {
             int size;
             lista_drivers.get(driver_index).get(url);
             lista_drivers.get(driver_index).manage().window().maximize();
-            size = ((Double) ((JavascriptExecutor) lista_drivers.get(driver_index)).executeScript(
+            size = ((Long) ((JavascriptExecutor) lista_drivers.get(driver_index)).executeScript(
                     "window.elements = document.querySelectorAll('*');" +
                     "return window.elements.length;")).intValue();
             if (number_of_elements == 0 || number_of_elements > size)
