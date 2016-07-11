@@ -36,6 +36,9 @@ public class App {
             lista_drivers.get(driver_index).get(url);
             lista_drivers.get(driver_index).manage().window().maximize();
             all_elements_browsers.add(lista_drivers.get(driver_index).findElements(By.cssSelector("*")));
+            executor2 = (JavascriptExecutor) lista_drivers.get(driver_index);
+            executor2.executeScript("window.css_attributes = " + css_attributes + ";" +
+                                    "window.elements = document.querySelectorAll('*');");
         }
         Thread.sleep(10000);
 
