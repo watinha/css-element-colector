@@ -165,35 +165,41 @@ public class App {
                 }
 
                 WebElement target = all_elements_browsers.get(driver_index).get(i);
-                BufferedImage fullimg = ImageIO.read(screenshot);
-                Point point = target.getLocation();
-                int width = (target.getSize().getWidth() != 0 ?
-                                target.getSize().getWidth() : 1),
-                    height = (target.getSize().getHeight() != 0 ?
-                                target.getSize().getHeight() : 1);
-                BufferedImage targetScreenshot = fullimg.getSubimage(
-                        0, 0, fullimg.getWidth(), fullimg.getHeight());
 
-                for (int image_x = 0; image_x < fullimg.getWidth(); image_x++) {
-                    for (int image_y = 0; image_y < fullimg.getHeight(); image_y++) {
-                        if (image_x <= point.getX() || image_x >= (point.getX() + width) ||
-                            image_y <= point.getY() || image_y >= (point.getY() + height)) {
-                            Color c = new Color(targetScreenshot.getRGB(image_x, image_y));
-                            targetScreenshot.setRGB(image_x, image_y,
-                                (new Color(
-                                    (int) Math.floor(0.1 * c.getRed()),
-                                    (int) Math.floor(0.1 * c.getGreen()),
-                                    (int) Math.floor(0.1 * c.getBlue()),
-                                    255
-                                )).hashCode());
-                        }
-                    }
-                }
-
-                File targetLocation = new File("data/" + folder + "." + filename + "." + i + "." + driver_index + ".png");
-                ImageIO.write(targetScreenshot, "png", targetLocation);
+                Main.save_element_position_screenshot(screenshot, target, folder, filename, driver_index);
             }
         }
+    }
+
+    public static void save_element_position_screenshot (File screenshot, WebElement target,
+                                                         String folder, String filename, int driver_index) throws Exception {
+        BufferedImage fullimg = ImageIO.read(screenshot);
+        Point point = target.getLocation();
+        int width = (target.getSize().getWidth() != 0 ?
+                        target.getSize().getWidth() : 1),
+            height = (target.getSize().getHeight() != 0 ?
+                        target.getSize().getHeight() : 1);
+        BufferedImage targetScreenshot = fullimg.getSubimage(
+                0, 0, fullimg.getWidth(), fullimg.getHeight());
+
+        for (int image_x = 0; image_x < fullimg.getWidth(); image_x++) {
+            for (int image_y = 0; image_y < fullimg.getHeight(); image_y++) {
+                if (image_x < point.getX() || image_x > (point.getX() + width) ||
+                    image_y < point.getY() || image_y > (point.getY() + height)) {
+                    Color c = new Color(targetScreenshot.getRGB(image_x, image_y));
+                    targetScreenshot.setRGB(image_x, image_y,
+                        (new Color(
+                            (int) Math.floor(0.1 * c.getRed()),
+                            (int) Math.floor(0.1 * c.getGreen()),
+                            (int) Math.floor(0.1 * c.getBlue()),
+                            255
+                        )).hashCode());
+                }
+            }
+        }
+
+        File targetLocation = new File("data/" + folder + "." + filename + "." + i + "." + driver_index + ".png");
+        ImageIO.write(targetScreenshot, "png", targetLocation);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
