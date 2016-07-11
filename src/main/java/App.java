@@ -1,5 +1,3 @@
-package edu.utfpr;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -26,22 +24,72 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 public class App {
 
     public static void crawl_and_capture_screens (String url, FileWriter writer, String folder, String filename,
-                                                  List <WebDriver> lista_drivers) throws IOException, InterruptedException {
+                                                  List <WebDriver> lista_drivers) throws Exception {
         List <List<WebElement>> all_elements_browsers = new ArrayList <List<WebElement>> ();
-        int driver_index, number_of_elements,
+        int driver_index, number_of_elements = 0,
             height = 0, width = 0, top = 0, left = 0,
             relativeTopParent = 0, relativeLeftParent = 0,
             relativeTopPrevSibling = 0, relativeLeftPrevSibling = 0,
             relativeTopNextSibling = 0, relativeLeftNextSibling = 0;
+        String tagName;
+        WebElement target, target_parent, target_next_sibling, target_previous_sibling;
+        WebDriver target_driver;
+        File screenshot;
 
         for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
+            int size;
             lista_drivers.get(driver_index).get(url);
             lista_drivers.get(driver_index).manage().window().maximize();
-            ((JavascriptExecutor) lista_drivers.get(driver_index)).executeScript(
-                    "window.elements = document.querySelectorAll('*');");
+            size = ((Double) ((JavascriptExecutor) lista_drivers.get(driver_index)).executeScript(
+                    "window.elements = document.querySelectorAll('*');" +
+                    "return window.elements.length;")).intValue();
+            if (number_of_elements == 0 || number_of_elements > size)
+                number_of_elements = size;
         }
         Thread.sleep(10000);
 
+        for (int element_index = (number_of_elements - 1); element_index >= 0; element_index--) {
+            for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
+                screenshot = ((TakesScreenshot) lista_drivers.get(driver_index)).getScreenshotAs(OutputType.FILE);
+                target_driver = lista_drivers.get(driver_index);
+                target = (WebElement) ((JavascriptExecutor) target_driver).executeScript(
+                        "return window.elements[" + element_index + "];");
+                target_parent = (WebElement) ((JavascriptExecutor) target_driver).executeScript(
+                        "return window.elements[" + element_index + "].parentElement;");
+                target_previous_sibling = (WebElement) ((JavascriptExecutor) target_driver).executeScript(
+						"var target = window.elements[" + element_index + "], p;" +
+                        "while (target.parentElement != null && target.previousElementSibling == null)" +
+                        "   target = target.parentElement;" +
+                        "return target.previousElementSibling;");
+                target_next_sibling = (WebElement) ((JavascriptExecutor) target_driver).executeScript(
+						"var target = window.elements[" + element_index + "], p;" +
+                        "while (target.parentElement != null && target.nextElementSibling == null)" +
+                        "   target = target.parentElement;" +
+                        "return target.nextElementSibling;");
+
+                tagName = target.getTagName();
+                height = target.getSize().getHeight();
+                width = target.getSize().getWidth();
+                top = target.getLocation().getY();
+                left = target.getLocation().getX();
+                relativeTopParent = target_parent.getLocation().getY();
+                relativeLeftParent = target_parent.getLocation().getX();
+                relativeTopPrevSibling = target_previous_sibling.getLocation().getY();
+                relativeLeftPrevSibling = target_previous_sibling.getLocation().getX();
+                relativeTopNextSibling = target_next_sibling.getLocation().getY();
+                relativeLeftNextSibling = target_next_sibling.getLocation().getX();
+
+                writer.write(folder + "." + filename + "." + element_index + "\t");
+                writer.write(tagName + "\t");
+                writer.write("\t" + height + "\t" + width + "\t" + top + "\t" + left +
+                             "\t" + relativeTopParent + "\t" + relativeLeftParent +
+                             "\t" + relativeTopPrevSibling + "\t" + relativeLeftPrevSibling +
+                             "\t" + relativeTopNextSibling + "\t" + relativeLeftNextSibling);
+
+                App.save_element_position_screenshot(screenshot, target, element_index, folder, filename, driver_index);
+            }
+            writer.write("\n");
+        }
     }
 
     public static void save_element_position_screenshot (File screenshot, WebElement target, int element_index,
@@ -75,7 +123,7 @@ public class App {
         ImageIO.write(targetScreenshot, "png", targetLocation);
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
         WebDriver driver = new FirefoxDriver();
         List <WebDriver> lista_drivers = new ArrayList <> ();
         lista_drivers.add(new FirefoxDriver());
@@ -91,19 +139,19 @@ public class App {
         }
         br_url.close();
 
-        writer.write("id\ttagname\theight\twidth\ttop\tleft\trelative top\trelative left");
-        writer.write("\trelative prev top\trelative prev left\trelative next top\trelative next left");
-        for (int j = 1; j < lista_drivers.size(); j++) {
-            writer.write("\theight diff " + j +
-                         "\twidth diff " + j +
-                         "\ttop diff " + j +
-                         "\tleft diff " + j +
-                         "\tparent top diff " + j +
-                         "\tparent left diff " + j +
-                         "\tprevious sibling top diff " + j +
-                         "\tprevious sibling left diff " + j +
-                         "\tnext sibling top diff " + j +
-                         "\tnext sibling left diff " + j);
+        writer.write("id");
+        for (int j = 0; j < lista_drivers.size(); j++) {
+            writer.write("\ttagname" + j +
+						 "\theight " + j +
+                         "\twidth " + j +
+                         "\ttop " + j +
+                         "\tleft " + j +
+                         "\tparent top " + j +
+                         "\tparent left " + j +
+                         "\tprevious sibling top " + j +
+                         "\tprevious sibling left " + j +
+                         "\tnext sibling top " + j +
+                         "\tnext sibling left " + j);
         }
 
         for (String url : url_list) {
