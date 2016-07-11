@@ -49,6 +49,7 @@ public class App {
         Thread.sleep(10000);
 
         for (int element_index = (number_of_elements - 1); element_index >= 0; element_index--) {
+            writer.write(folder + "." + filename + "." + element_index + "\t");
             for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
                 screenshot = ((TakesScreenshot) lista_drivers.get(driver_index)).getScreenshotAs(OutputType.FILE);
                 target_driver = lista_drivers.get(driver_index);
@@ -85,7 +86,6 @@ public class App {
                     relativeLeftNextSibling = target_next_sibling.getLocation().getX();
                 }
 
-                writer.write(folder + "." + filename + "." + element_index + "\t");
                 writer.write(tagName + "\t");
                 writer.write("\t" + height + "\t" + width + "\t" + top + "\t" + left +
                              "\t" + relativeTopParent + "\t" + relativeLeftParent +
@@ -157,11 +157,12 @@ public class App {
                          "\tleft " + j +
                          "\tparent top " + j +
                          "\tparent left " + j +
-                         "\tprevious sibling top " + j +
-                         "\tprevious sibling left " + j +
+                         "\tprev sibling top " + j +
+                         "\tprev sibling left " + j +
                          "\tnext sibling top " + j +
                          "\tnext sibling left " + j);
         }
+        writer.write("\n");
 
         for (String url : url_list) {
             String filename = url.substring(url.lastIndexOf("/") + 1),
