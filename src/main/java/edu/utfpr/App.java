@@ -28,150 +28,23 @@ public class App {
     public static void crawl_and_capture_screens (String url, FileWriter writer, String folder, String filename,
                                                   List <WebDriver> lista_drivers) throws IOException, InterruptedException {
         List <List<WebElement>> all_elements_browsers = new ArrayList <List<WebElement>> ();
-        int driver_index, size_elements;
-        JavascriptExecutor executor2;
+        int driver_index, number_of_elements,
+            height = 0, width = 0, top = 0, left = 0,
+            relativeTopParent = 0, relativeLeftParent = 0,
+            relativeTopPrevSibling = 0, relativeLeftPrevSibling = 0,
+            relativeTopNextSibling = 0, relativeLeftNextSibling = 0;
 
         for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
             lista_drivers.get(driver_index).get(url);
             lista_drivers.get(driver_index).manage().window().maximize();
-            all_elements_browsers.add(lista_drivers.get(driver_index).findElements(By.cssSelector("*")));
-            executor2 = (JavascriptExecutor) lista_drivers.get(driver_index);
-            executor2.executeScript("window.elements = document.querySelectorAll('*');");
+            ((JavascriptExecutor) lista_drivers.get(driver_index)).executeScript(
+                    "window.elements = document.querySelectorAll('*');");
         }
         Thread.sleep(10000);
 
-        for (int i = 0; i < all_elements_browsers.get(0).size(); i++) {
-            int offsetHeight = 0,
-                offsetWidth = 0,
-                offsetTop = 0,
-                offsetLeft = 0,
-                relativeOffsetTop = 0,
-                relativeOffsetLeft = 0,
-                relativeTopPrevSibling = 0,
-                relativeLeftPrevSibling = 0,
-                relativeTopNextSibling = 0,
-                relativeLeftNextSibling = 0;
-            for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
-                executor2 = (JavascriptExecutor) lista_drivers.get(driver_index);
-                File screenshot = ((TakesScreenshot) lista_drivers.get(driver_index)).getScreenshotAs(OutputType.FILE);
-                if (driver_index == 0) {
-                    offsetHeight = Integer.parseInt(executor2.executeScript(
-                                    "return window.elements[" + i + "].offsetHeight").toString());
-                    offsetWidth  = Integer.parseInt(executor2.executeScript(
-                                    "return window.elements[" + i + "].offsetWidth").toString());
-                    offsetTop    = Integer.parseInt(executor2.executeScript(
-                                    "return window.elements[" + i + "].offsetTop").toString());
-                    offsetLeft   = Integer.parseInt(executor2.executeScript(
-                                    "return window.elements[" + i + "].offsetLeft").toString());
-                    relativeOffsetTop = Integer.parseInt(executor2.executeScript(
-                        "if (window.elements[" + i + "].parentElement)" +
-                        "return window.elements[" + i + "].offsetTop - window.elements[" + i + "].parentElement.offsetTop;" +
-                        "return window.elements[" + i + "].offsetTop;").toString());
-                    relativeOffsetLeft = Integer.parseInt(executor2.executeScript(
-                        "if (window.elements[" + i + "].parentElement)" +
-                        "return window.elements[" + i + "].offsetLeft - window.elements[" + i + "].parentElement.offsetLeft;" +
-                        "return window.elements[" + i + "].offsetLeft;").toString());
-
-                    relativeTopPrevSibling = Integer.parseInt(executor2.executeScript(
-                        "var target = window.elements[" + i + "], p;" +
-                        "while (target.parentElement != null && target.previousElementSibling === null)" +
-                        "   target = target.parentElement;" +
-                        "if (target.previousElementSibling)" +
-                        "return window.elements[" + i + "].offsetTop - target.previousElementSibling.offsetTop;" +
-                        "return 0;").toString());
-                    relativeLeftPrevSibling = Integer.parseInt(executor2.executeScript(
-                        "var target = window.elements[" + i + "], p;" +
-                        "while (target.parentElement != null && target.previousElementSibling === null)" +
-                        "   target = target.parentElement;" +
-                        "if (target.previousElementSibling)" +
-                        "return window.elements[" + i + "].offsetLeft - target.previousElementSibling.offsetLeft;" +
-                        "return 0;").toString());
-                    relativeTopNextSibling = Integer.parseInt(executor2.executeScript(
-                        "var target = window.elements[" + i + "], p;" +
-                        "while (target.parentElement != null && target.nextElementSibling === null)" +
-                        "   target = target.parentElement;" +
-                        "if (target.nextElementSibling)" +
-                        "return window.elements[" + i + "].offsetTop - target.nextElementSibling.offsetTop;" +
-                        "return 0;").toString());
-                    relativeLeftNextSibling = Integer.parseInt(executor2.executeScript(
-                        "var target = window.elements[" + i + "], p;" +
-                        "while (target.parentElement != null && target.nextElementSibling === null)" +
-                        "   target = target.parentElement;" +
-                        "if (target.nextElementSibling)" +
-                        "return window.elements[" + i + "].offsetLeft - target.nextElementSibling.offsetLeft;" +
-                        "return 0;").toString());
-
-                    writer.write("\t" + offsetHeight);
-                    writer.write("\t" + offsetWidth);
-                    writer.write("\t" + offsetTop);
-                    writer.write("\t" + offsetLeft);
-                    writer.write("\t" + relativeOffsetTop);
-                    writer.write("\t" + relativeOffsetLeft);
-
-                    writer.write("\t" + relativeTopPrevSibling);
-                    writer.write("\t" + relativeLeftPrevSibling);
-                    writer.write("\t" + relativeTopNextSibling);
-                    writer.write("\t" + relativeLeftNextSibling);
-                } else {
-                    writer.write("\t" +
-                            Math.abs(offsetHeight - Integer.parseInt(executor2.executeScript(
-                                    "return window.elements[" + i + "].offsetHeight").toString())));
-                    writer.write("\t" +
-                            Math.abs(offsetWidth - Integer.parseInt(executor2.executeScript(
-                                    "return window.elements[" + i + "].offsetWidth").toString())));
-                    writer.write("\t" +
-                            Math.abs(offsetTop - Integer.parseInt(executor2.executeScript(
-                                    "return window.elements[" + i + "].offsetTop").toString())));
-                    writer.write("\t" +
-                            Math.abs(offsetLeft - Integer.parseInt(executor2.executeScript(
-                                    "return window.elements[" + i + "].offsetLeft").toString())));
-                    writer.write("\t" + Math.abs(relativeOffsetTop - Integer.parseInt(executor2.executeScript(
-                        "if (window.elements[" + i + "].parentElement)" +
-                        "return window.elements[" + i + "].offsetTop - window.elements[" + i + "].parentElement.offsetTop;" +
-                        "return 0;").toString())));
-                    writer.write("\t" + Math.abs(relativeOffsetLeft- Integer.parseInt(executor2.executeScript(
-                        "if (window.elements[" + i + "].parentElement)" +
-                        "return window.elements[" + i + "].offsetLeft - window.elements[" + i + "].parentElement.offsetLeft;" +
-                        "return 0;").toString())));
-
-                    writer.write("\t" + Math.abs(relativeTopPrevSibling - Integer.parseInt(executor2.executeScript(
-                        "var target = window.elements[" + i + "], p;" +
-                        "while (target.parentElement != null && target.previousElementSibling === null)" +
-                        "   target = target.parentElement;" +
-                        "if (target.previousElementSibling)" +
-                        "return window.elements[" + i + "].offsetTop - target.previousElementSibling.offsetTop;" +
-                        "return 0;").toString())));
-                    writer.write("\t" + Math.abs(relativeLeftPrevSibling - Integer.parseInt(executor2.executeScript(
-                        "var target = window.elements[" + i + "], p;" +
-                        "while (target.parentElement != null && target.previousElementSibling === null)" +
-                        "   target = target.parentElement;" +
-                        "if (target.previousElementSibling)" +
-                        "return window.elements[" + i + "].offsetLeft - target.previousElementSibling.offsetLeft;" +
-                        "return 0;").toString())));
-                    writer.write("\t" + Math.abs(relativeTopNextSibling - Integer.parseInt(executor2.executeScript(
-                        "var target = window.elements[" + i + "], p;" +
-                        "while (target.parentElement != null && target.nextElementSibling === null)" +
-                        "   target = target.parentElement;" +
-                        "if (target.nextElementSibling)" +
-                        "return window.elements[" + i + "].offsetTop - target.nextElementSibling.offsetTop;" +
-                        "return 0;").toString())));
-                    writer.write("\t" + Math.abs(relativeLeftNextSibling - Integer.parseInt(executor2.executeScript(
-                        "var target = window.elements[" + i + "], p;" +
-                        "while (target.parentElement != null && target.nextElementSibling === null)" +
-                        "   target = target.parentElement;" +
-                        "if (target.nextElementSibling)" +
-                        "return window.elements[" + i + "].offsetLeft - target.nextElementSibling.offsetLeft;" +
-                        "return 0;").toString())));
-                }
-
-                WebElement target = all_elements_browsers.get(driver_index).get(i);
-
-                Main.save_element_position_screenshot(screenshot, target, folder, filename, driver_index);
-            }
-        }
     }
 
-    public static void save_element_position_screenshot (File screenshot, WebElement target,
+    public static void save_element_position_screenshot (File screenshot, WebElement target, int element_index,
                                                          String folder, String filename, int driver_index) throws Exception {
         BufferedImage fullimg = ImageIO.read(screenshot);
         Point point = target.getLocation();
@@ -198,7 +71,7 @@ public class App {
             }
         }
 
-        File targetLocation = new File("data/" + folder + "." + filename + "." + i + "." + driver_index + ".png");
+        File targetLocation = new File("data/" + folder + "." + filename + "." + element_index + "." + driver_index + ".png");
         ImageIO.write(targetScreenshot, "png", targetLocation);
     }
 
@@ -218,7 +91,7 @@ public class App {
         }
         br_url.close();
 
-        writer.write("id\theight\twidth\ttop\tleft\trelative top\trelative left");
+        writer.write("id\ttagname\theight\twidth\ttop\tleft\trelative top\trelative left");
         writer.write("\trelative prev top\trelative prev left\trelative next top\trelative next left");
         for (int j = 1; j < lista_drivers.size(); j++) {
             writer.write("\theight diff " + j +
