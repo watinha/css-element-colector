@@ -218,7 +218,6 @@ public class App {
         List <WebDriver> lista_drivers = new ArrayList <> ();
         lista_drivers.add(new FirefoxDriver());
         lista_drivers.add(new ChromeDriver());
-        lista_drivers.add(new InternetExplorerDriver());
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         FileWriter writer = new FileWriter(new File("data/elements.csv"));
         BufferedReader br = new BufferedReader(new FileReader("css-attributes-selection.txt"));
