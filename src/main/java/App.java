@@ -27,10 +27,10 @@ public class App {
                                                   List <WebDriver> lista_drivers) throws Exception {
         List <List<WebElement>> all_elements_browsers = new ArrayList <List<WebElement>> ();
         int driver_index, number_of_elements = 0,
-            height = 0, width = 0, top = 0, left = 0,
-            relativeTopParent = 0, relativeLeftParent = 0,
-            relativeTopPrevSibling = 0, relativeLeftPrevSibling = 0,
-            relativeTopNextSibling = 0, relativeLeftNextSibling = 0;
+            height = -1, width = -1, top = -1, left = -1,
+            relativeTopParent = -1, relativeLeftParent = -1,
+            relativeTopPrevSibling = -1, relativeLeftPrevSibling = -1,
+            relativeTopNextSibling = -1, relativeLeftNextSibling = -1;
         String tagName;
         WebElement target, target_parent, target_next_sibling, target_previous_sibling;
         WebDriver target_driver;
@@ -72,12 +72,18 @@ public class App {
                 width = target.getSize().getWidth();
                 top = target.getLocation().getY();
                 left = target.getLocation().getX();
-                relativeTopParent = target_parent.getLocation().getY();
-                relativeLeftParent = target_parent.getLocation().getX();
-                relativeTopPrevSibling = target_previous_sibling.getLocation().getY();
-                relativeLeftPrevSibling = target_previous_sibling.getLocation().getX();
-                relativeTopNextSibling = target_next_sibling.getLocation().getY();
-                relativeLeftNextSibling = target_next_sibling.getLocation().getX();
+                if (target_parent != null) {
+                    relativeTopParent = target_parent.getLocation().getY();
+                    relativeLeftParent = target_parent.getLocation().getX();
+                }
+                if (target_previous_sibling != null) {
+                    relativeTopPrevSibling = target_previous_sibling.getLocation().getY();
+                    relativeLeftPrevSibling = target_previous_sibling.getLocation().getX();
+                }
+                if (target_next_sibling != null) {
+                    relativeTopNextSibling = target_next_sibling.getLocation().getY();
+                    relativeLeftNextSibling = target_next_sibling.getLocation().getX();
+                }
 
                 writer.write(folder + "." + filename + "." + element_index + "\t");
                 writer.write(tagName + "\t");
