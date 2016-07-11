@@ -86,11 +86,11 @@ public class App {
                     relativeLeftNextSibling = target_next_sibling.getLocation().getX();
                 }
 
-                writer.write(tagName + "\t");
+                writer.write(tagName);
                 writer.write("\t" + height + "\t" + width + "\t" + top + "\t" + left +
                              "\t" + relativeTopParent + "\t" + relativeLeftParent +
                              "\t" + relativeTopPrevSibling + "\t" + relativeLeftPrevSibling +
-                             "\t" + relativeTopNextSibling + "\t" + relativeLeftNextSibling);
+                             "\t" + relativeTopNextSibling + "\t" + relativeLeftNextSibling + "\t");
 
                 App.save_element_position_screenshot(screenshot, target, element_index, folder, filename, driver_index);
 
