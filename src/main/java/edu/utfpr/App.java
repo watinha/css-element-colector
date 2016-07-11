@@ -25,8 +25,7 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 
 public class App {
 
-    public static void crawl_and_capture_screens (String url, String css_attributes,
-                                                  FileWriter writer, String folder, String filename,
+    public static void crawl_and_capture_screens (String url, FileWriter writer, String folder, String filename,
                                                   List <WebDriver> lista_drivers) throws IOException, InterruptedException {
         List <List<WebElement>> all_elements_browsers = new ArrayList <List<WebElement>> ();
         int driver_index, size_elements;
@@ -37,8 +36,7 @@ public class App {
             lista_drivers.get(driver_index).manage().window().maximize();
             all_elements_browsers.add(lista_drivers.get(driver_index).findElements(By.cssSelector("*")));
             executor2 = (JavascriptExecutor) lista_drivers.get(driver_index);
-            executor2.executeScript("window.css_attributes = " + css_attributes + ";" +
-                                    "window.elements = document.querySelectorAll('*');");
+            executor2.executeScript("window.elements = document.querySelectorAll('*');");
         }
         Thread.sleep(10000);
 
@@ -57,16 +55,6 @@ public class App {
                 executor2 = (JavascriptExecutor) lista_drivers.get(driver_index);
                 File screenshot = ((TakesScreenshot) lista_drivers.get(driver_index)).getScreenshotAs(OutputType.FILE);
                 if (driver_index == 0) {
-                    writer.write("\n");
-                    writer.write(folder + "." + filename + "." + i + "\t" + executor2.executeScript(
-                        "window.styles_t = window.getComputedStyle(window.elements[" + i + "], null);" +
-                        "window.result = [];" +
-                        "for (var i in window.css_attributes) {" +
-                            "if (Number.isNaN(parseInt(window.css_attributes[i])) && typeof window.styles_t[window.css_attributes[i]] !== 'function')" +
-                                "window.result.push(window.styles_t[window.css_attributes[i]]);" +
-                        "}" +
-                        "return window.result.join('\t')"
-                    ).toString());
                     offsetHeight = Integer.parseInt(executor2.executeScript(
                                     "return window.elements[" + i + "].offsetHeight").toString());
                     offsetWidth  = Integer.parseInt(executor2.executeScript(
@@ -215,7 +203,6 @@ public class App {
         lista_drivers.add(new ChromeDriver());
         JavascriptExecutor executor = (JavascriptExecutor) driver;
         FileWriter writer = new FileWriter(new File("data/elements.csv"));
-        BufferedReader br = new BufferedReader(new FileReader("css-attributes-selection.txt"));
         BufferedReader br_url = new BufferedReader(new FileReader("url_list.txt"));
         List <String> url_list = new ArrayList <> ();
         String u = br_url.readLine();
@@ -225,27 +212,7 @@ public class App {
         }
         br_url.close();
 
-        String css_attributes = "[",
-               attr = br.readLine();
-
-        while (attr != null) {
-            css_attributes += "\"" + attr + "\"";
-            attr = br.readLine();
-            if (attr == null) {
-                css_attributes += "]";
-                break;
-            }
-            css_attributes += ",";
-        }
-        br.close();
-
-        driver.get(url_list.get(0));
-        driver.manage().window().maximize();
-        writer.write("id\t" + executor.executeScript(
-            "window.css_attributes = " + css_attributes + ";" +
-            "return window.css_attributes.join('\t')"
-        ).toString());
-        writer.write("\theight\twidth\ttop\tleft\trelative top\trelative left");
+        writer.write("id\theight\twidth\ttop\tleft\trelative top\trelative left");
         writer.write("\trelative prev top\trelative prev left\trelative next top\trelative next left");
         for (int j = 1; j < lista_drivers.size(); j++) {
             writer.write("\theight diff " + j +
@@ -263,7 +230,7 @@ public class App {
         for (String url : url_list) {
             String filename = url.substring(url.lastIndexOf("/") + 1),
                    folder = url.substring(url.lastIndexOf("/", url.lastIndexOf("/") - 1) + 1, url.lastIndexOf("/"));
-            App.crawl_and_capture_screens(url, css_attributes, writer, folder, filename, lista_drivers);
+            App.crawl_and_capture_screens(url, writer, folder, filename, lista_drivers);
         }
         writer.close();
         driver.quit();
