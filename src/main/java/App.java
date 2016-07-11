@@ -87,6 +87,9 @@ public class App {
                              "\t" + relativeTopNextSibling + "\t" + relativeLeftNextSibling);
 
                 App.save_element_position_screenshot(screenshot, target, element_index, folder, filename, driver_index);
+
+                ((JavascriptExecutor) target_driver).executeScript(
+                        "window.elements[" + element_index + "].style.opacity = 0;");
             }
             writer.write("\n");
         }
