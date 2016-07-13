@@ -15,6 +15,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Point;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -33,17 +34,23 @@ public class App {
             height = -1, width = -1, top = -1, left = -1,
             relativeTopParent = -1, relativeLeftParent = -1,
             relativeTopPrevSibling = -1, relativeLeftPrevSibling = -1,
-            relativeTopNextSibling = -1, relativeLeftNextSibling = -1;
+            relativeTopNextSibling = -1, relativeLeftNextSibling = -1,
+            size;
         String tagName;
         WebElement target, target_parent, target_next_sibling, target_previous_sibling;
         WebDriver target_driver;
         File screenshot;
 
         for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
-            int size;
-            lista_drivers.get(driver_index).get(url);
-            lista_drivers.get(driver_index).manage().window().maximize();
-            size = ((Long) ((JavascriptExecutor) lista_drivers.get(driver_index)).executeScript(
+            target_driver = lista_drivers.get(driver_index);
+            target_driver.get(url);
+            target_driver.manage().window().maximize();
+            if (((RemoteWebDriver) target_driver).getCapabilities().getBrowserName().equals("internet explorer")) {
+                ((JavascriptExecutor) target_driver).executeScript(
+                    "document.querySelector('html').style.width = document.querySelector('html').scrollWidth + 'px';" +
+                    "document.querySelector('html').style.height = document.querySelector('html').scrollHeight + 'px';");
+            }
+            size = ((Long) ((JavascriptExecutor) target_driver).executeScript(
                     "window.elements = document.querySelectorAll('*');" +
                     "return window.elements.length;")).intValue();
             if (number_of_elements == 0 || number_of_elements > size)
@@ -54,8 +61,8 @@ public class App {
         for (int element_index = (number_of_elements - 1); element_index >= 0; element_index--) {
             writer.write(folder + "." + filename + "." + element_index + "\t");
             for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
-                screenshot = ((TakesScreenshot) lista_drivers.get(driver_index)).getScreenshotAs(OutputType.FILE);
                 target_driver = lista_drivers.get(driver_index);
+                screenshot = ((TakesScreenshot) target_driver).getScreenshotAs(OutputType.FILE);
                 target = (WebElement) ((JavascriptExecutor) target_driver).executeScript(
                         "return window.elements[" + element_index + "];");
                 target_parent = (WebElement) ((JavascriptExecutor) target_driver).executeScript(
