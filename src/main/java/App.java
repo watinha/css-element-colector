@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 
@@ -20,6 +21,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 public class App {
 
@@ -133,11 +136,13 @@ public class App {
     }
 
     public static void main(String[] args) throws Exception {
-        WebDriver driver = new FirefoxDriver();
         List <WebDriver> lista_drivers = new ArrayList <> ();
-        lista_drivers.add(new FirefoxDriver());
-        lista_drivers.add(new ChromeDriver());
-        JavascriptExecutor executor = (JavascriptExecutor) driver;
+        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
+                                              DesiredCapabilities.firefox()));
+        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
+                                              DesiredCapabilities.chrome()));
+        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
+                                              DesiredCapabilities.internetExplorer()));
         FileWriter writer = new FileWriter(new File("data/elements.csv"));
         BufferedReader br_url = new BufferedReader(new FileReader("url_list.txt"));
         List <String> url_list = new ArrayList <> ();
@@ -170,7 +175,6 @@ public class App {
             App.crawl_and_capture_screens(url, writer, folder, filename, lista_drivers);
         }
         writer.close();
-        driver.quit();
         for (WebDriver d : lista_drivers)
             d.quit();
     }
