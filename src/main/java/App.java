@@ -35,7 +35,7 @@ public class App {
             relativeTopParent = -1, relativeLeftParent = -1,
             relativeTopPrevSibling = -1, relativeLeftPrevSibling = -1,
             relativeTopNextSibling = -1, relativeLeftNextSibling = -1,
-            size;
+            size, window_height, window_width;
         String tagName;
         WebElement target, target_parent, target_next_sibling, target_previous_sibling;
         WebDriver target_driver;
@@ -59,7 +59,6 @@ public class App {
         Thread.sleep(10000);
 
         for (int element_index = (number_of_elements - 1); element_index >= 0; element_index--) {
-            writer.write(folder + "." + filename + "." + element_index + "\t");
             for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
                 target_driver = lista_drivers.get(driver_index);
                 screenshot = ((TakesScreenshot) target_driver).getScreenshotAs(OutputType.FILE);
@@ -83,6 +82,18 @@ public class App {
                 width = target.getSize().getWidth();
                 top = target.getLocation().getY();
                 left = target.getLocation().getX();
+
+                window_height = target_driver.manage().window().getSize().getHeight();
+                window_width = target_driver.manage().window().getSize().getWidth();
+
+                if (window_height < height + top || window_width < width + left) {
+                    ((JavascriptExecutor) target_driver).executeScript(
+                            "window.elements[" + element_index + "].style.opacity = 0;");
+                    break;
+                }
+                if (driver_index == 0) {
+                    writer.write(folder + "." + filename + "." + element_index + "\t");
+                }
                 if (target_parent != null) {
                     relativeTopParent = target_parent.getLocation().getY();
                     relativeLeftParent = target_parent.getLocation().getX();
@@ -103,12 +114,38 @@ public class App {
                              "\t" + relativeTopNextSibling + "\t" + relativeLeftNextSibling + "\t");
 
                 App.save_element_position_screenshot(screenshot, target, element_index, folder, filename, driver_index);
+                App.save_target_screenshot(screenshot, target, element_index, folder, filename, driver_index);
 
                 ((JavascriptExecutor) target_driver).executeScript(
                         "window.elements[" + element_index + "].style.opacity = 0;");
+                screenshot.delete();
+                if (driver_index == (lista_drivers.size() - 1)) {
+                    writer.write("\n");
+                }
             }
-            writer.write("\n");
         }
+    }
+
+    public static File save_target_screenshot (File screenshot, WebElement target, int element_index,
+                                               String folder, String filename, int driver_index) throws Exception {
+        BufferedImage full_image = ImageIO.read(screenshot),
+                      sub_image = null;
+        int left = target.getLocation().getX(),
+            top = target.getLocation().getY(),
+            height = target.getSize().getHeight(),
+            width = target.getSize().getWidth();
+        if (top + height > full_image.getHeight())
+            height = full_image.getHeight() - top;
+        if (left + width > full_image.getWidth())
+            width = full_image.getWidth() - left;
+        sub_image = full_image.getSubimage(
+                left, top,
+                (width <= 0 ? 1 : width),
+                (height <= 0 ? 1 : height));
+        File file = new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/" +
+                              folder + "." + filename + "." + element_index + "." + driver_index + ".element.png");
+        ImageIO.write(sub_image, "png", file);
+        return file;
     }
 
     public static void save_element_position_screenshot (File screenshot, WebElement target, int element_index,
@@ -138,19 +175,20 @@ public class App {
             }
         }
 
-        File targetLocation = new File("data/" + folder + "." + filename + "." + element_index + "." + driver_index + ".png");
+        File targetLocation = new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/" +
+                                        folder + "." + filename + "." + element_index + "." + driver_index + ".png");
         ImageIO.write(targetScreenshot, "png", targetLocation);
     }
 
     public static void main(String[] args) throws Exception {
         List <WebDriver> lista_drivers = new ArrayList <> ();
         lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
+                                              DesiredCapabilities.chrome())); // first driver has to be chrome
+        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
                                               DesiredCapabilities.firefox()));
         lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
-                                              DesiredCapabilities.chrome()));
-        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
                                               DesiredCapabilities.internetExplorer()));
-        FileWriter writer = new FileWriter(new File("data/elements.csv"));
+        FileWriter writer = new FileWriter(new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/elements.csv"));
         BufferedReader br_url = new BufferedReader(new FileReader("url_list.txt"));
         List <String> url_list = new ArrayList <> ();
         String u = br_url.readLine();
