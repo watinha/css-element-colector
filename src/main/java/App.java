@@ -132,7 +132,7 @@ public class App {
                     writer.write("\n");
                 }
             }
-            App.resize_images_similarly(screenshot_list);
+            App.resize_images_similarly(screenshot_list, element_index, folder, filename);
         }
     }
 
@@ -190,7 +190,8 @@ public class App {
         ImageIO.write(targetScreenshot, "png", targetLocation);
     }
 
-    public static void resize_images_similarly (List <File> files_list) throws Exception {
+    public static void resize_images_similarly (List <File> files_list, int element_index,
+                                                String folder, String filename) throws Exception {
         List <BufferedImage> images_list = new ArrayList <BufferedImage> ();
         int min_width = 9999,
             min_height = 9999,
@@ -209,9 +210,8 @@ public class App {
                 min_height = buf_image.getHeight();
         }
         for (i = 0; i < images_list.size(); i++) {
-            buf_image = images_list.get(0);
-            file = files_list.get(0);
-            file.delete();
+            buf_image = images_list.get(i);
+            file = files_list.get(i);
             image = buf_image.getScaledInstance(min_width, min_height, Image.SCALE_DEFAULT);
             new_buf_image = new BufferedImage(
                     image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
@@ -220,7 +220,7 @@ public class App {
             graphics.dispose();
             file.delete();
             file = new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/" +
-                      folder + "." + filename + "." + element_index + "." + driver_index + ".resized.png");
+                      folder + "." + filename + "." + element_index + "." + i + ".resized.png");
             ImageIO.write(new_buf_image, "png", file);
         }
     }
