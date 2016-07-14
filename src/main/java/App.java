@@ -27,6 +27,10 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import ru.yandex.qatools.ashot.AShot;
+import ru.yandex.qatools.ashot.Screenshot;
+import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
+
 public class App {
 
     public static void crawl_and_capture_screens (String url, FileWriter writer, String folder, String filename,
@@ -65,7 +69,16 @@ public class App {
             screenshot_list.clear();
             for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
                 target_driver = lista_drivers.get(driver_index);
-                screenshot = ((TakesScreenshot) target_driver).getScreenshotAs(OutputType.FILE);
+                if (((RemoteWebDriver) target_driver).getCapabilities().getBrowserName().equals("chrome")) {
+                    screenshot = new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/" +
+                              element_index + "." + driver_index + ".png");
+                    Screenshot ashot_screenshot = new AShot().shootingStrategy(
+                            ShootingStrategies.viewportPasting(500)).takeScreenshot(target_driver);
+                    BufferedImage ashot_image = ashot_screenshot.getImage();
+                    ImageIO.write(ashot_image, "PNG", screenshot);
+                } else {
+                    screenshot = ((TakesScreenshot) target_driver).getScreenshotAs(OutputType.FILE);
+                }
                 target = (WebElement) ((JavascriptExecutor) target_driver).executeScript(
                         "return window.elements[" + element_index + "];");
                 target_parent = (WebElement) ((JavascriptExecutor) target_driver).executeScript(
@@ -211,6 +224,8 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         List <WebDriver> lista_drivers = new ArrayList <> ();
+        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
+                                              DesiredCapabilities.chrome()));
         lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
                                               DesiredCapabilities.firefox()));
         lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
