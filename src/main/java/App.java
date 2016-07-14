@@ -218,6 +218,9 @@ public class App {
             graphics = new_buf_image.createGraphics();
             graphics.drawImage(image, 0, 0, null);
             graphics.dispose();
+            file.delete();
+            file = new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/" +
+                      folder + "." + filename + "." + element_index + "." + driver_index + ".resized.png");
             ImageIO.write(new_buf_image, "png", file);
         }
     }
