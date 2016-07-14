@@ -1,4 +1,6 @@
 import java.awt.Color;
+import java.awt.Image;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,6 +42,7 @@ public class App {
         WebElement target, target_parent, target_next_sibling, target_previous_sibling;
         WebDriver target_driver;
         File screenshot;
+        List <File> screenshot_list = new ArrayList <File> ();
 
         for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
             target_driver = lista_drivers.get(driver_index);
@@ -59,6 +62,7 @@ public class App {
         Thread.sleep(10000);
 
         for (int element_index = (number_of_elements - 1); element_index >= 0; element_index--) {
+            screenshot_list.clear();
             for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
                 target_driver = lista_drivers.get(driver_index);
                 screenshot = ((TakesScreenshot) target_driver).getScreenshotAs(OutputType.FILE);
@@ -83,14 +87,6 @@ public class App {
                 top = target.getLocation().getY();
                 left = target.getLocation().getX();
 
-                window_height = target_driver.manage().window().getSize().getHeight();
-                window_width = target_driver.manage().window().getSize().getWidth();
-
-                if (window_height < height + top || window_width < width + left) {
-                    ((JavascriptExecutor) target_driver).executeScript(
-                            "window.elements[" + element_index + "].style.opacity = 0;");
-                    break;
-                }
                 if (driver_index == 0) {
                     writer.write(folder + "." + filename + "." + element_index + "\t");
                 }
@@ -114,7 +110,7 @@ public class App {
                              "\t" + relativeTopNextSibling + "\t" + relativeLeftNextSibling + "\t");
 
                 App.save_element_position_screenshot(screenshot, target, element_index, folder, filename, driver_index);
-                App.save_target_screenshot(screenshot, target, element_index, folder, filename, driver_index);
+                screenshot_list.add(App.save_target_screenshot(screenshot, target, element_index, folder, filename, driver_index));
 
                 ((JavascriptExecutor) target_driver).executeScript(
                         "window.elements[" + element_index + "].style.opacity = 0;");
@@ -123,6 +119,7 @@ public class App {
                     writer.write("\n");
                 }
             }
+            App.resize_images_similarly(screenshot_list);
         }
     }
 
@@ -180,10 +177,40 @@ public class App {
         ImageIO.write(targetScreenshot, "png", targetLocation);
     }
 
+    public static void resize_images_similarly (List <File> files_list) throws Exception {
+        List <BufferedImage> images_list = new ArrayList <BufferedImage> ();
+        int min_width = 9999,
+            min_height = 9999,
+            i;
+        Image image;
+        BufferedImage buf_image, new_buf_image;
+        File file;
+        Graphics2D graphics;
+        for (i = 0; i < files_list.size(); i++) {
+            file = files_list.get(i);
+            buf_image = ImageIO.read(file);
+            images_list.add(buf_image);
+            if (min_width > buf_image.getWidth())
+                min_width = buf_image.getWidth();
+            if (min_height > buf_image.getHeight())
+                min_height = buf_image.getHeight();
+        }
+        for (i = 0; i < images_list.size(); i++) {
+            buf_image = images_list.get(0);
+            file = files_list.get(0);
+            file.delete();
+            image = buf_image.getScaledInstance(min_width, min_height, Image.SCALE_DEFAULT);
+            new_buf_image = new BufferedImage(
+                    image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+            graphics = new_buf_image.createGraphics();
+            graphics.drawImage(image, 0, 0, null);
+            graphics.dispose();
+            ImageIO.write(new_buf_image, "png", file);
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         List <WebDriver> lista_drivers = new ArrayList <> ();
-        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
-                                              DesiredCapabilities.chrome())); // first driver has to be chrome
         lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
                                               DesiredCapabilities.firefox()));
         lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
