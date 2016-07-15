@@ -143,6 +143,10 @@ public class App {
             for (driver_index = 0; driver_index < screenshot_similarity.length; driver_index++) {
                 writer.write(screenshot_similarity[driver_index] + "\t");
             }
+            screenshot_similarity = App.image_diff(screenshot_list);
+            for (driver_index = 0; driver_index < screenshot_similarity.length; driver_index++) {
+                writer.write(screenshot_similarity[driver_index] + "\t");
+            }
             writer.write("\n");
         }
     }
@@ -203,6 +207,36 @@ public class App {
         File targetLocation = new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/" +
                                         folder + "." + filename + "." + element_index + "." + driver_index + ".png");
         ImageIO.write(targetScreenshot, "png", targetLocation);
+    }
+
+    public static double [] image_diff (List <File> file_list) throws Exception {
+		BufferedImage base = ImageIO.read(file_list.get(0)),
+					  target;
+		double [] results = new double[file_list.size()];
+        int width = base.getWidth(null),
+            height = base.getHeight(null);
+        results[0] = 0; // comparing base to base
+
+		for (int i = 1; i < file_list.size(); i++) {
+            target = ImageIO.read(file_list.get(i));
+            results[i] = 0;
+            for (int y = 0; y < height; y++) {
+              for (int x = 0; x < width; x++) {
+                int rgb1 = base.getRGB(x, y);
+                int rgb2 = target.getRGB(x, y);
+                int r1 = (rgb1 >> 16) & 0xff;
+                int g1 = (rgb1 >>  8) & 0xff;
+                int b1 = (rgb1      ) & 0xff;
+                int r2 = (rgb2 >> 16) & 0xff;
+                int g2 = (rgb2 >>  8) & 0xff;
+                int b2 = (rgb2      ) & 0xff;
+                results[i] += Math.abs(r1 - r2);
+                results[i] += Math.abs(g1 - g2);
+                results[i] += Math.abs(b1 - b2);
+              }
+            }
+        }
+        return results;
     }
 
     public static double [] chi_squared (List <File> file_list) throws Exception {
@@ -298,6 +332,9 @@ public class App {
         }
         for (j = 0; j < lista_drivers.size(); j++) {
             writer.write("\tchi-squared " + j);
+        }
+        for (j = 0; j < lista_drivers.size(); j++) {
+            writer.write("\tdiff " + j);
         }
         writer.write("\n");
 
