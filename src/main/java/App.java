@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.net.URL;
@@ -15,6 +16,8 @@ import javax.imageio.ImageIO;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.MatOfFloat;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
@@ -205,7 +208,9 @@ public class App {
     public static double [] chi_squared (List <File> file_list) throws Exception {
         double [] results = new double[file_list.size()];
         Mat base = Highgui.imread(file_list.get(0).getAbsolutePath()),
-            target, hist_base, hist_target;
+            target,
+            hist_base = new Mat(),
+            hist_target = new Mat();
         MatOfInt histSize = new MatOfInt(256, 256, 256),
                  channels = new MatOfInt(0, 1, 2);
         MatOfFloat ranges = new MatOfFloat(0.0f, 256.0f, 0.0f, 256.0f, 0.0f, 256.0f);
