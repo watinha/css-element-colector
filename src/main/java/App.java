@@ -144,10 +144,14 @@ public class App {
             top = target.getLocation().getY(),
             height = target.getSize().getHeight(),
             width = target.getSize().getWidth();
+        if (top > full_image.getHeight())
+            top = full_image.getHeight() - 2;
+        if (left > full_image.getWidth())
+            left = full_image.getWidth() - 2;
         if (top + height > full_image.getHeight())
-            height = full_image.getHeight() - top;
+            height = full_image.getHeight() - top - 1;
         if (left + width > full_image.getWidth())
-            width = full_image.getWidth() - left;
+            width = full_image.getWidth() - left - 1;
         sub_image = full_image.getSubimage(
                 left, top,
                 (width <= 0 ? 1 : width),
@@ -193,8 +197,8 @@ public class App {
     public static void resize_images_similarly (List <File> files_list, int element_index,
                                                 String folder, String filename) throws Exception {
         List <BufferedImage> images_list = new ArrayList <BufferedImage> ();
-        int min_width = 9999,
-            min_height = 9999,
+        int max_width = -1,
+            max_height = -1,
             i;
         Image image;
         BufferedImage buf_image, new_buf_image;
@@ -204,15 +208,15 @@ public class App {
             file = files_list.get(i);
             buf_image = ImageIO.read(file);
             images_list.add(buf_image);
-            if (min_width > buf_image.getWidth())
-                min_width = buf_image.getWidth();
-            if (min_height > buf_image.getHeight())
-                min_height = buf_image.getHeight();
+            if (max_width < buf_image.getWidth())
+                max_width = buf_image.getWidth();
+            if (max_height < buf_image.getHeight())
+                max_height = buf_image.getHeight();
         }
         for (i = 0; i < images_list.size(); i++) {
             buf_image = images_list.get(i);
             file = files_list.get(i);
-            image = buf_image.getScaledInstance(min_width, min_height, Image.SCALE_DEFAULT);
+            image = buf_image.getScaledInstance(max_width, max_height, Image.SCALE_DEFAULT);
             new_buf_image = new BufferedImage(
                     image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
             graphics = new_buf_image.createGraphics();
