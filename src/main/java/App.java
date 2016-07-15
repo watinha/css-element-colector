@@ -13,6 +13,11 @@ import java.net.URL;
 
 import javax.imageio.ImageIO;
 
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
@@ -41,7 +46,8 @@ public class App {
             relativeTopParent = -1, relativeLeftParent = -1,
             relativeTopPrevSibling = -1, relativeLeftPrevSibling = -1,
             relativeTopNextSibling = -1, relativeLeftNextSibling = -1,
-            size, window_height, window_width;
+            size, window_height, window_width, i;
+        double [] screenshot_similarity;
         String tagName;
         WebElement target, target_parent, target_next_sibling, target_previous_sibling;
         WebDriver target_driver;
@@ -128,11 +134,13 @@ public class App {
                 ((JavascriptExecutor) target_driver).executeScript(
                         "window.elements[" + element_index + "].style.opacity = 0;");
                 screenshot.delete();
-                if (driver_index == (lista_drivers.size() - 1)) {
-                    writer.write("\n");
-                }
             }
-            App.resize_images_similarly(screenshot_list, element_index, folder, filename);
+            screenshot_list = App.resize_images_similarly(screenshot_list, element_index, folder, filename);
+            screenshot_similarity = App.chi_squared(screenshot_list);
+            for (driver_index = 0; driver_index < screenshot_similarity.length; driver_index++) {
+                writer.write(screenshot_similarity[driver_index] + "\t");
+            }
+            writer.write("\n");
         }
     }
 
@@ -194,9 +202,27 @@ public class App {
         ImageIO.write(targetScreenshot, "png", targetLocation);
     }
 
-    public static void resize_images_similarly (List <File> files_list, int element_index,
+    public static double [] chi_squared (List <File> file_list) throws Exception {
+        double [] results = new double[file_list.size()];
+        Mat base = Highgui.imread(file_list.get(0).getAbsolutePath()),
+            target, hist_base, hist_target;
+        MatOfInt histSize = new MatOfInt(256, 256, 256),
+                 channels = new MatOfInt(0, 1, 2);
+        MatOfFloat ranges = new MatOfFloat(0.0f, 256.0f, 0.0f, 256.0f, 0.0f, 256.0f);
+        results[0] = 0; // comparing base to base
+        Imgproc.calcHist(Arrays.asList(base), channels, new Mat(), hist_base, histSize, ranges);
+        for (int i = 1; i < file_list.size(); i++) {
+            target = Highgui.imread(file_list.get(i).getAbsolutePath());
+            Imgproc.calcHist(Arrays.asList(target), channels, new Mat(), hist_target, histSize, ranges);
+            results[i] = Imgproc.compareHist(hist_base, hist_target, Imgproc.CV_COMP_CHISQR);
+        }
+        return results;
+    }
+
+    public static List <File> resize_images_similarly (List <File> files_list, int element_index,
                                                 String folder, String filename) throws Exception {
         List <BufferedImage> images_list = new ArrayList <BufferedImage> ();
+        List <File> resized_list = new ArrayList <File> ();
         int max_width = -1,
             max_height = -1,
             i;
@@ -226,11 +252,15 @@ public class App {
             file = new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/" +
                       folder + "." + filename + "." + element_index + "." + i + ".resized.png");
             ImageIO.write(new_buf_image, "png", file);
+            resized_list.add(file);
         }
+        return resized_list;
     }
 
     public static void main(String[] args) throws Exception {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         List <WebDriver> lista_drivers = new ArrayList <> ();
+        int j;
         lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
                                               DesiredCapabilities.chrome()));
         lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
@@ -248,7 +278,7 @@ public class App {
         br_url.close();
 
         writer.write("id");
-        for (int j = 0; j < lista_drivers.size(); j++) {
+        for (j = 0; j < lista_drivers.size(); j++) {
             writer.write("\ttagname" + j +
 						 "\theight " + j +
                          "\twidth " + j +
@@ -260,6 +290,9 @@ public class App {
                          "\tprev sibling left " + j +
                          "\tnext sibling top " + j +
                          "\tnext sibling left " + j);
+        }
+        for (j = 0; j < lista_drivers.size(); j++) {
+            writer.write("\tchi-squared " + j);
         }
         writer.write("\n");
 
