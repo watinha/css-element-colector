@@ -159,13 +159,13 @@ public class App {
             top = target.getLocation().getY(),
             height = target.getSize().getHeight(),
             width = target.getSize().getWidth();
-        if (top > full_image.getHeight())
+        if (top >= full_image.getHeight())
             top = full_image.getHeight() - 2;
-        if (left > full_image.getWidth())
+        if (left >= full_image.getWidth())
             left = full_image.getWidth() - 2;
-        if (top + height > full_image.getHeight())
+        if (top + height >= full_image.getHeight())
             height = full_image.getHeight() - top - 1;
-        if (left + width > full_image.getWidth())
+        if (left + width >= full_image.getWidth())
             width = full_image.getWidth() - left - 1;
         sub_image = full_image.getSubimage(
                 left, top,
@@ -300,11 +300,11 @@ public class App {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         List <WebDriver> lista_drivers = new ArrayList <> ();
         int j;
-        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
+        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.237:4444/wd/hub"),
                                               DesiredCapabilities.chrome()));
-        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
+        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.237:4444/wd/hub"),
                                               DesiredCapabilities.firefox()));
-        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.103:4444/wd/hub"),
+        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.237:4444/wd/hub"),
                                               DesiredCapabilities.internetExplorer()));
         FileWriter writer = new FileWriter(new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/elements.csv"));
         BufferedReader br_url = new BufferedReader(new FileReader("url_list.txt"));
