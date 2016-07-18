@@ -159,6 +159,14 @@ public class App {
             top = target.getLocation().getY(),
             height = target.getSize().getHeight(),
             width = target.getSize().getWidth();
+        if (top < 0) {
+            height = height + top;
+            top = 0;
+        }
+        if (left < 0) {
+            width = width + left;
+            left = 0;
+        }
         if (top >= full_image.getHeight())
             top = full_image.getHeight() - 2;
         if (left >= full_image.getWidth())
