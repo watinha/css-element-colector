@@ -339,6 +339,7 @@ public class App {
         writer.write("\n");
 
         for (String url : url_list) {
+            System.out.println(url);
             String filename = url.substring(url.lastIndexOf("/") + 1),
                    folder = url.substring(url.lastIndexOf("/", url.lastIndexOf("/") - 1) + 1, url.lastIndexOf("/"));
             App.crawl_and_capture_screens(url, writer, folder, filename, lista_drivers);
