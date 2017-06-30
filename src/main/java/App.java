@@ -79,7 +79,7 @@ public class App {
             for (driver_index = 0; driver_index < lista_drivers.size(); driver_index++) {
                 target_driver = lista_drivers.get(driver_index);
                 if (((RemoteWebDriver) target_driver).getCapabilities().getBrowserName().equals("chrome")) {
-                    screenshot = new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/" +
+                    screenshot = new File(App.folder_path +
                               element_index + "." + driver_index + ".png");
                     Screenshot ashot_screenshot = new AShot().shootingStrategy(
                             ShootingStrategies.viewportPasting(500)).takeScreenshot(target_driver);
@@ -179,7 +179,7 @@ public class App {
                 left, top,
                 (width <= 0 ? 1 : width),
                 (height <= 0 ? 1 : height));
-        File file = new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/" +
+        File file = new File(App.folder_path +
                               folder + "." + filename + "." + element_index + "." + driver_index + ".element.png");
         ImageIO.write(sub_image, "png", file);
         return file;
@@ -212,7 +212,7 @@ public class App {
             }
         }
 
-        File targetLocation = new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/" +
+        File targetLocation = new File(App.folder_path +
                                         folder + "." + filename + "." + element_index + "." + driver_index + ".png");
         ImageIO.write(targetScreenshot, "png", targetLocation);
     }
@@ -296,13 +296,15 @@ public class App {
             graphics.drawImage(image, 0, 0, null);
             graphics.dispose();
             file.delete();
-            file = new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/" +
+            file = new File(App.folder_path +
                       folder + "." + filename + "." + element_index + "." + i + ".resized.png");
             ImageIO.write(new_buf_image, "png", file);
             resized_list.add(file);
         }
         return resized_list;
     }
+
+    private static folder_path = "/home/wwatanabe/Dropbox/artigos/xbi/xbi-css/results-mobile/201602/";
 
     public static void main(String[] args) throws Exception {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -314,7 +316,7 @@ public class App {
                                               DesiredCapabilities.firefox()));
         lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.237:4444/wd/hub"),
                                               DesiredCapabilities.internetExplorer()));
-        FileWriter writer = new FileWriter(new File("/media/willian/Seagate Expansion Drive/xbi-data-07-2016/elements.csv"));
+        FileWriter writer = new FileWriter(new File(App.folder_path + "elements.csv"));
         BufferedReader br_url = new BufferedReader(new FileReader("url_list.txt"));
         List <String> url_list = new ArrayList <> ();
         String u = br_url.readLine();
