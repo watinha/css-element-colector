@@ -7,7 +7,7 @@ import org.openqa.selenium.WebElement;
 public abstract class Driver {
     private WebDriver webdriver;
 
-    protected void collectFeatures () {
+    public void collectFeatures () {
         int numberOfElements = ((Integer) this.getJSExecutor().executeScript(
                 "window.elements = document.querySelectorAll('*');" +
                 "return window.elements.length;", null)).intValue();
