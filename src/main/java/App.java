@@ -50,7 +50,7 @@ public class App {
             relativeTopPrevSibling = -1, relativeLeftPrevSibling = -1,
             relativeTopNextSibling = -1, relativeLeftNextSibling = -1,
             size, window_height, window_width, i;
-        double [] screenshot_similarity;
+        double [] screenshot_similarity = {-1, -1, -1};
         String tagName;
         WebElement target, target_parent, target_next_sibling, target_previous_sibling;
         WebDriver target_driver;
@@ -304,20 +304,21 @@ public class App {
         return resized_list;
     }
 
-    private static folder_path = "/home/wwatanabe/Dropbox/artigos/xbi/xbi-css/results-mobile/201602/";
+    private static String folder_path = "/home/wwatanabe/Dropbox/artigos/xbi/xbi-css/results-mobile/201602/";
 
     public static void main(String[] args) throws Exception {
+        System.out.println(System.getProperty("java.library.path"));
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         List <WebDriver> lista_drivers = new ArrayList <> ();
         int j;
-        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.237:4444/wd/hub"),
+        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.0.15:4444/wd/hub"),
                                               DesiredCapabilities.chrome()));
-        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.237:4444/wd/hub"),
+        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.0.15:4444/wd/hub"),
                                               DesiredCapabilities.firefox()));
-        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.122.237:4444/wd/hub"),
+        lista_drivers.add(new RemoteWebDriver(new URL("http://192.168.0.15:4444/wd/hub"),
                                               DesiredCapabilities.internetExplorer()));
         FileWriter writer = new FileWriter(new File(App.folder_path + "elements.csv"));
-        BufferedReader br_url = new BufferedReader(new FileReader("url_list.txt"));
+        BufferedReader br_url = new BufferedReader(new FileReader("url_list_mobile.txt"));
         List <String> url_list = new ArrayList <> ();
         String u = br_url.readLine();
         while (u != null) {
